@@ -1,6 +1,5 @@
 streamlit
 ffmpeg
-libsm6
 libxext6
 libgl1-mesa-glx
 opencv-python==4.9.0.80
