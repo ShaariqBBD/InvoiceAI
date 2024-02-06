@@ -1,6 +1,5 @@
 streamlit
 ffmpeg
-libgl1-mesa-glx
 opencv-python==4.9.0.80
 pytesseract
 fitz
