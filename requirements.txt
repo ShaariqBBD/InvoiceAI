@@ -1,8 +1,7 @@
 streamlit
 opencv-python-headless
-pytesseract
 common
-paddle
+paddlepaddle
 paddleocr
 pypdf
 PyMuPDF
