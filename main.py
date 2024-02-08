@@ -3,7 +3,7 @@ import os
 import json
 import urllib.request
 import ssl
-from Extraction import TextExtraction
+import TextExtraction as te
 import tempfile
 
 def allowSelfSignedHttps(allowed):
@@ -15,20 +15,37 @@ allowSelfSignedHttps(True)
 
 st.title("Invoice AI 💰")
 
-uploaded_invoice = st.file_uploader("Choose your .pdf file", type="pdf")
+uploaded_file = st.file_uploader("Choose your file", type="pdf, png, jpeg, jpg")
 
-if uploaded_invoice is not None:
-    filename = uploaded_invoice.name
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+if uploaded_file is not None:
+    if te.isPDF(uploaded_file):
+        suffix = ".pdf"
+    elif te.isImage(uploaded_file):
+        suffix = ".png"
+    else:
+        suffix = ""
+
+    filename = uploaded_file.name
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
         temp_filename = temp_file.name
-
         with open(temp_filename, 'wb') as f:
-            f.write(uploaded_invoice.read())
+            f.write(uploaded_file.read())
+        st.write('File uploaded:', uploaded_file.name)
 
-        invoice_text = TextExtraction.streamlit_text_generator(temp_filename)
+        if te.isPDF(uploaded_file):
+            st.write("File type: PDF")
+            text = te.extractTextFromPDF(uploaded_file)
+            st.write(text)
+        elif te.isImage(uploaded_file):
+            st.write("File type: Image")
+            text, image = te.extractTextFromImage(uploaded_file)
+            st.write(text)
+            st.image(image, caption="Uploaded Image", use_column_width=True)
+        else:
+            st.write("Unknown file type")
+
         st.success("PDF file uploaded and processed successfully")
-        st.write(invoice_text)
-        data = invoice_text
+        data = text
 
         body = str.encode(json.dumps(data))
 
