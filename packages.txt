@@ -1,1 +1,1 @@
-tesseract-ocr
+libssl1.1_1.1.1f-1ubuntu2_amd64
