@@ -12,7 +12,7 @@ import fitz
 import os
 
 # Pytesseract needs to point to the locally installed tesseract file
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Users\bbdnet3167\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\bbdnet3167\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
 
 class TextExtraction:

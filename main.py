@@ -33,7 +33,7 @@ if uploaded_invoice is not None:
         body = str.encode(json.dumps(data))
 
         url = 'https://discobank-llama2-invoice-poc.eastus2.inference.ml.azure.com/score'
-        api_key = 'whbfoPDtE0cNcJcU4HaKJNGqeaXRHhXg'
+        api_key = '2bwtTLswXxoWg5ry5x8BrtspldlBqx6j'
         if not api_key:
             raise Exception("A key should be provided to invoke the endpoint")
         
@@ -47,6 +47,7 @@ if uploaded_invoice is not None:
             result = response.read()
             print(result)
 
+            st.write("result goes here")
             st.write(result)
 
         except urllib.error.HTTPError as error:
