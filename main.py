@@ -49,7 +49,6 @@ if uploaded_file is not None:
             text = te.extractTextFromImage(temp_filename)
             st.write(text)
 
-        st.write(type(text))
         data = text
 
         body = str.encode(json.dumps(data))

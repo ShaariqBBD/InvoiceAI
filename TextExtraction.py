@@ -69,4 +69,4 @@ def extractTextFromImage(file):
     for page in result:
         for line in page:
             ret_text += line[1][0]
-    return ret_text, image
+    return ret_text
