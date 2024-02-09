@@ -70,23 +70,3 @@ def extractTextFromImage(file):
         for line in page:
             ret_text += line[1][0]
     return ret_text, image
-    
-def main():
-    st.title("Text Extraction")
-    uploaded_file = st.file_uploader("Choose a file", type=['pdf', 'png', 'jpg', 'jpeg'])
-
-    if uploaded_file is not None:
-        st.write('File uploaded:', uploaded_file.name)
-        
-        if isPDF(uploaded_file):
-            st.write("File type: PDF")
-            text = extractTextFromPDF(uploaded_file)
-            st.write(text)
-        elif isImage(uploaded_file):
-            st.write("File type: Image")
-            text = extractTextFromImage(uploaded_file)
-            st.write(text)
-        else:
-            st.write("Unknown file type")
-        
-        print(text)
