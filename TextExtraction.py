@@ -4,6 +4,7 @@ import fitz
 import io
 from PIL import Image
 from PyPDF2 import PdfReader
+import numpy as np
 
 
 def isPDF(file):
@@ -29,19 +30,28 @@ def pdfToImage(file):
 def extractTextFromPDF(file):
     reader = PdfReader(file)
     ocr = PaddleOCR(use_angle_cls=True, lang="en", use_gpu=False)
-    parts = pdfToImage(file)
-    index = 0
-    for part in parts:
-        textract= reader.pages[index].extract_text()
-        if textract != "":
-            ret_text = textract
-        elif textract == "":
-            result = ocr.ocr(part, cls=True)
-            for page in result:
-                for line in page:
-                    ret_text += line[1][0]
-        index += 1
-    return ret_text
+    text = ""
+    for page_num, page in enumerate(reader.pages):
+        textract = page.extract_text()
+        if textract:
+            print("This has selectable text")
+            text += textract
+        else:
+            with st.spinner("No selectable text found, using OCR instead."):
+                print("This does not have selectable text, using OCR instead.")
+                st.balloons()
+                images = pdfToImage(file)
+                if page_num < len(images):
+                    for image in images:
+                        image = images[0]
+                        with io.BytesIO() as output:
+                            image.save(output, format="PNG")
+                            data = output.getvalue()
+                        result = ocr.ocr(data, cls=True)
+                        for page_result in result:
+                            for line in page_result:
+                                text += line[1][0]
+    return text
 
 def extractTextFromImage(file):
     image = Image.open(file)
