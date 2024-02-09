@@ -15,36 +15,40 @@ allowSelfSignedHttps(True)
 
 st.title("Invoice AI 💰")
 
-uploaded_file = st.file_uploader("Choose your file", type="pdf, png, jpeg, jpg")
+uploaded_file = st.file_uploader("Choose your file", type=["pdf", "jpeg", "jpg", "png"])
 
 if uploaded_file is not None:
-    if te.isPDF(uploaded_file):
-        suffix = ".pdf"
-    elif te.isImage(uploaded_file):
-        suffix = ".png"
-    else:
-        suffix = ""
 
     filename = uploaded_file.name
+    file_type = uploaded_file.type
+    suffix = ""
+    isImage = False
+
+    if te.isPDF(file_type):
+        st.write("PDF uploaded successfully!")
+        suffix = ".pdf"
+    elif te.isJPG(file_type):
+        st.write("Image uploaded successfully!")
+        suffix = ".jpg"
+    elif te.isPNG(file_type):
+        st.write("Image uploaded successfully!")
+        suffix = ".png"
+    else:
+        st.write("Unsuccessful upload!")
+        
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
         temp_filename = temp_file.name
         with open(temp_filename, 'wb') as f:
             f.write(uploaded_file.read())
-        st.write('File uploaded:', uploaded_file.name)
+        st.write('File uploaded to server: ', uploaded_file.name)
 
-        if te.isPDF(uploaded_file):
-            st.write("File type: PDF")
-            text = te.extractTextFromPDF(uploaded_file)
+        if te.isPDF(file_type):
+            text = te.extractTextFromPDF(temp_filename)
             st.write(text)
-        elif te.isImage(uploaded_file):
-            st.write("File type: Image")
-            text, image = te.extractTextFromImage(uploaded_file)
+        elif te.isJPG(file_type) or te.isPNG(file_type): 
+            text = te.extractTextFromImage(temp_filename)
             st.write(text)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-        else:
-            st.write("Unknown file type")
 
-        st.success("PDF file uploaded and processed successfully")
         data = text
 
         body = str.encode(json.dumps(data))

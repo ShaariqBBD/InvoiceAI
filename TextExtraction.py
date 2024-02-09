@@ -7,7 +7,22 @@ from PyPDF2 import PdfReader
 
 
 def isPDF(file):
-    return file.name.endswith('.pdf')
+    if file == "application/pdf":
+        return True
+    else:
+        return False
+    
+def isPNG(file):
+    if file == "image/png":
+        return True
+    else:
+        return False
+    
+def isJPG(file):
+    if file == "image/jpeg":
+        return True
+    else:
+        return False
 
 def isImage(file): 
     try:
