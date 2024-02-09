@@ -8,7 +8,22 @@ import numpy as np
 
 
 def isPDF(file):
-    return file.name.endswith('.pdf')
+    if file == "application/pdf":
+        return True
+    else:
+        return False
+    
+def isPNG(file):
+    if file == "image/png":
+        return True
+    else:
+        return False
+    
+def isJPG(file):
+    if file == "image/jpeg":
+        return True
+    else:
+        return False
 
 def isImage(file): 
     try:
@@ -64,4 +79,4 @@ def extractTextFromImage(file):
     for page in result:
         for line in page:
             ret_text += line[1][0]
-    return ret_text, image
+    return ret_text
