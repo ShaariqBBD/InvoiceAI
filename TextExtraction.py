@@ -92,9 +92,9 @@ def extractTextFromPDF(file):
                     print("Result::::", result)
                     for page_result in result:
                         for line in page_result:
-                            text += line[1][0]
+                            text += " ",line[1][0]
             # append the selectable text
-            text+=textract
+            text+="\n",textract
 
         # CASE 3: If the page has NO selectable text
         else:
