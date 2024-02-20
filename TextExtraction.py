@@ -6,6 +6,17 @@ from PIL import Image
 from PyPDF2 import PdfReader
 import numpy as np
 
+def pdfHasImages(file):
+    print("PDF has Images run")
+    doc = fitz.open(file)
+    for pageNum in range(len(doc)):
+        page = doc.load_page(pageNum)
+        images = page.get_images(full=True)
+        if images:
+            print("Has images.")
+            return True
+    print("Has no images.")
+    return False
 
 def isPDF(file):
     if file == "application/pdf":
@@ -43,29 +54,71 @@ def pdfToImage(file):
     return images
 
 def extractTextFromPDF(file):
+    pdfFile = fitz.open(file)
     reader = PdfReader(file)
     ocr = PaddleOCR(use_angle_cls=True, lang="en", use_gpu=False)
     text = ""
     for page_num, page in enumerate(reader.pages):
         textract = page.extract_text()
-        if textract:
+
+        # CASE 1: If the page has ONLY selectable text
+        if textract and pdfHasImages(file) == False:
             print("This has selectable text")
             text += textract
+
+        # CASE 2: If the page has embedded images
+        elif textract and pdfHasImages(file) == True:
+            # iterate over pdf pages
+            # get the page itself
+            page = pdfFile[page_num]
+            image_list = page.get_images()
+            # printing number of images found in this page
+            if image_list:
+                print(f"[+] Found a total of {len(image_list)} images in page {page_num}")
+            else:
+                print("[!] No images found on page", page_num)
+            for image_index, img in enumerate(page.get_images(), start=1):
+                # get the XREF of the image
+                xref = img[0]
+                # extract the image bytes
+                base_image = pdfFile.extract_image(xref)
+                image_bytes = base_image["image"]
+            # get the image extension
+                image_ext = base_image["ext"]
+            # load it to PIL
+                image = Image.open(io.BytesIO(image_bytes))
+                text += "This is from image:"
+                result = ocr.ocr(image_bytes, cls=True)
+                if result!=[None]:
+                    print("Result::::", result)
+                    for page_result in result:
+                        for line in page_result:
+                            text += line[1][0]
+
+            text+= "This is textracted: "
+            text+=textract
+
+        # CASE 3: If the page has NO selectable text
         else:
             with st.spinner("No selectable text found, using OCR instead."):
                 print("This does not have selectable text, using OCR instead.")
                 st.balloons()
                 images = pdfToImage(file)
                 if page_num < len(images):
-                    for image in images:
-                        image = images[0]
-                        with io.BytesIO() as output:
-                            image.save(output, format="PNG")
-                            data = output.getvalue()
-                        result = ocr.ocr(data, cls=True)
+                    image = images[page_num]
+                    with io.BytesIO() as output:
+                        image.save(output, format="PNG")
+                        data = output.getvalue()
+                    result = ocr.ocr(data, cls=True)
+                    print("Result", result)
+                    if result!=[None]:
+                        print("Result::::", result)
                         for page_result in result:
                             for line in page_result:
                                 text += line[1][0]
+                    else:
+                        print("No text found in image at index", page_num)
+
     return text
 
 def extractTextFromImage(file):
