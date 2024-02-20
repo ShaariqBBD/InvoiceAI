@@ -68,7 +68,6 @@ def extractTextFromPDF(file):
 
         # CASE 2: If the page has embedded images
         elif textract and pdfHasImages(file) == True:
-            # iterate over pdf pages
             # get the page itself
             page = pdfFile[page_num]
             image_list = page.get_images()
@@ -83,19 +82,18 @@ def extractTextFromPDF(file):
                 # extract the image bytes
                 base_image = pdfFile.extract_image(xref)
                 image_bytes = base_image["image"]
-            # get the image extension
+                # get the image extension
                 image_ext = base_image["ext"]
-            # load it to PIL
+                # load it to PIL
                 image = Image.open(io.BytesIO(image_bytes))
-                text += "This is from image:"
+                # perform OCR
                 result = ocr.ocr(image_bytes, cls=True)
                 if result!=[None]:
                     print("Result::::", result)
                     for page_result in result:
                         for line in page_result:
                             text += line[1][0]
-
-            text+= "This is textracted: "
+            # append the selectable text
             text+=textract
 
         # CASE 3: If the page has NO selectable text
