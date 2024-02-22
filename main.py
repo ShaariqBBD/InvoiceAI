@@ -52,11 +52,14 @@ if uploaded_file is not None:
             files = {'invoice': file}
             response = requests.post(url, files=files)
 
+        response_data = json.loads(response.text)
+        extracted_text = response_data.get('extracted_text', '')
+
         # response = requests.post("https://invoiceocr-flask.azurewebsites.net/", files={'invoice': temp_filename})
 
         st.write("-------------------------------------------------------")
         st.write("Debugging:")
-        st.write(response.text)
+        st.write(extracted_text)
         st.write("-------------------------------------------------------")
 
         if te.isPDF(file_type):
