@@ -4,7 +4,7 @@ import json
 import requests
 import ssl
 import urllib.request
-import TextExtraction as te
+import FileHandler as fh
 import tempfile
 
 def allowSelfSignedHttps(allowed):
@@ -25,13 +25,13 @@ if uploaded_file is not None:
     suffix = ""
     isImage = False
 
-    if te.isPDF(file_type):
+    if fh.isPDF(file_type):
         st.write("PDF uploaded successfully!")
         suffix = ".pdf"
-    elif te.isJPG(file_type):
+    elif fh.isJPG(file_type):
         st.write("Image uploaded successfully!")
         suffix = ".jpg"
-    elif te.isPNG(file_type):
+    elif fh.isPNG(file_type):
         st.write("Image uploaded successfully!")
         suffix = ".png"
     else:
@@ -51,8 +51,6 @@ if uploaded_file is not None:
         response_data = json.loads(response.text)
         extracted_text = response_data.get('extracted_text', '')
 
-        # response = requests.post("https://invoiceocr-flask.azurewebsites.net/", files={'invoice': temp_filename})
-
         st.header("Response from OCR")
         st.write(extracted_text)
 
@@ -69,13 +67,12 @@ if uploaded_file is not None:
 
         body = str.encode(json.dumps(data))
 
-        url = 'https://discobank-llama2-invoice-poc.eastus2.inference.ml.azure.com/score'
-        # api_key = st.secrets["AZURE_ENDPOINT_KEY"]
-        api_key = "AkCYhDRwcfsjuFU6vYz6eLaRKjWeNC57"
+        url = 'https://discobank-mistral-invoice-poc.eastus2.inference.ml.azure.com/score'
+        api_key = st.secrets["AZURE_ENDPOINT_KEY"]
         if not api_key:
             raise Exception("A key should be provided to invoke the endpoint")
         
-        headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ api_key), 'azureml-model-deployment': 'llama2-7b-invoice-test' }
+        headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ api_key), 'azureml-model-deployment': 'mistral-7b-invoice-test' }
 
         req = urllib.request.Request(url, body, headers)
 
@@ -146,6 +143,7 @@ if uploaded_file is not None:
 
         with col3:
             st.write("Bank Name:")
+            st.write("\n")
             st.write(bank_name)
 
         with col4:
@@ -158,10 +156,12 @@ if uploaded_file is not None:
 
         with col6:
             st.write("Currency:")
+            st.write("\n")
             st.write(currency)
 
         with col7:
-            st.write("Reference")
+            st.write("Reference:")
+            st.write("\n")
             st.write(reference)
         
         confirmed = st.checkbox("Confirm the payment details are correct")
