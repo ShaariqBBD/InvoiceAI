@@ -54,15 +54,6 @@ if uploaded_file is not None:
         st.header("Response from OCR")
         st.write(extracted_text)
 
-        # if te.isPDF(file_type):
-        #     text = te.extractTextFromPDF(temp_filename)
-        #     st.header("Extracted text:")
-        #     st.write(text)
-        # elif te.isJPG(file_type) or te.isPNG(file_type): 
-        #     text = te.extractTextFromImage(temp_filename)
-        #     st.header("Extracted text:")
-        #     st.write(text)
-
         data = extracted_text
 
         body = str.encode(json.dumps(data))
