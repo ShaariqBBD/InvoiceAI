@@ -1,9 +1,10 @@
 import streamlit as st
 import os
 import json
-import urllib.request
+import requests
 import ssl
-import TextExtraction as te
+import urllib.request
+import FileHandler as fh
 import tempfile
 
 def allowSelfSignedHttps(allowed):
@@ -24,13 +25,13 @@ if uploaded_file is not None:
     suffix = ""
     isImage = False
 
-    if te.isPDF(file_type):
+    if fh.isPDF(file_type):
         st.write("PDF uploaded successfully!")
         suffix = ".pdf"
-    elif te.isJPG(file_type):
+    elif fh.isJPG(file_type):
         st.write("Image uploaded successfully!")
         suffix = ".jpg"
-    elif te.isPNG(file_type):
+    elif fh.isPNG(file_type):
         st.write("Image uploaded successfully!")
         suffix = ".png"
     else:
@@ -41,25 +42,28 @@ if uploaded_file is not None:
         with open(temp_filename, 'wb') as f:
             f.write(uploaded_file.read())
 
-        if te.isPDF(file_type):
-            text = te.extractTextFromPDF(temp_filename)
-            st.header("Extracted text:")
-            st.write(text)
-        elif te.isJPG(file_type) or te.isPNG(file_type): 
-            text = te.extractTextFromImage(temp_filename)
-            st.header("Extracted text:")
-            st.write(text)
+        url = "https://invoiceocr-flask.azurewebsites.net/"
 
-        data = text
+        with open(temp_filename, 'rb') as file:
+            files = {'invoice': file}
+            response = requests.post(url, files=files)
+
+        response_data = json.loads(response.text)
+        extracted_text = response_data.get('extracted_text', '')
+
+        st.header("Response from OCR")
+        st.write(extracted_text)
+
+        data = extracted_text
 
         body = str.encode(json.dumps(data))
 
-        url = 'https://discobank-llama2-invoice-poc.eastus2.inference.ml.azure.com/score'
+        url = 'https://discobank-mistral-invoice-poc.eastus2.inference.ml.azure.com/score'
         api_key = st.secrets["AZURE_ENDPOINT_KEY"]
         if not api_key:
             raise Exception("A key should be provided to invoke the endpoint")
         
-        headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ api_key), 'azureml-model-deployment': 'llama2-7b-invoice-test' }
+        headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ api_key), 'azureml-model-deployment': 'mistral-7b-invoice-test' }
 
         req = urllib.request.Request(url, body, headers)
 
@@ -67,7 +71,11 @@ if uploaded_file is not None:
             response = urllib.request.urlopen(req)
 
             result = response.read()
+            result = result.decode('utf-8')
             result = json.loads(result)
+
+            st.header("Response from LLM")
+            st.write(result)
 
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
@@ -77,52 +85,80 @@ if uploaded_file is not None:
 
         st.header("Payment Details")
 
-        bank = ""
-        total_amount = ""
+        account_holder = ""
+        bank_name = ""
         account_number = ""
+        account_type = ""
+        amount_due = ""
+        currency = ""
         reference = ""
 
         try:
-            bank = result["invoice"].get("bank")
+            account_holder = result.get("Account Holder")
         except:
-            bank = "None"
+            account_holder = "null"
         try:
-            total_amount = result["invoice"].get("total_amount")
+            bank_name = result.get("Bank Name")
         except:
-            total_amount = "None"
+            bank_name = "null"
         try:
-            account_number = result["invoice"].get("account_number")
+            account_number = result.get("Account Number")
         except:
-            account_number = "None"
+            account_number = "null"
         try:
-            reference = result["invoice"].get("reference")
+            account_type = result.get("Account Type")
         except:
-            reference = "None"
+            account_type = "null"
+        try:
+            amount_due = result.get("Amount Due")
+        except:
+            amount_due = "null"
+        try:
+            currency = result.get("Currency")
+        except:
+            currency = "null"
+        try:
+            reference = result.get("Reference")
+        except:
+            reference = "null"
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
         
         with col1:
-            st.write("Bank:")
-            st.write(bank)
+            st.write("Account Holder:")
+            st.write(account_holder)
         
         with col2:
+            st.write("Account Type:")
+            st.write(account_type)
+
+        with col3:
+            st.write("Bank Name:")
+            st.write("\n")
+            st.write(bank_name)
+
+        with col4:
             st.write("Account Number:")
             st.write(account_number)
 
-        with col3:
+        with col5:
             st.write("Amount Due:")
-            st.write(total_amount)
+            st.write(amount_due)
 
-        with col4:
+        with col6:
+            st.write("Currency:")
+            st.write("\n")
+            st.write(currency)
+
+        with col7:
             st.write("Reference:")
+            st.write("\n")
             st.write(reference)
         
         confirmed = st.checkbox("Confirm the payment details are correct")
 
         if confirmed:
-            st.success("Payment confirmed!")
-        else:
-            st.warning("Please review the details carefully before confirming.")
+            st.balloons()
 
 
 

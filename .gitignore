@@ -1,3 +1,5 @@
 venv/
 .venv
 .Identifier
+/__pycache__
+.devcontainer
