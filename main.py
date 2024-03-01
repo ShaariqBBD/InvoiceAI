@@ -51,15 +51,16 @@ if uploaded_file is not None:
         response_data = json.loads(response.text)
         extracted_text = response_data.get('extracted_text', '')
 
-        st.header("Response from OCR")
-        st.write(extracted_text)
+        # st.header("Response from OCR")
+        # st.write(extracted_text)
 
         data = extracted_text
 
         body = str.encode(json.dumps(data))
 
         url = 'https://discobank-mistral-invoice-poc.eastus2.inference.ml.azure.com/score'
-        api_key = st.secrets["AZURE_ENDPOINT_KEY"]
+        #api_key = st.secrets["AZURE_ENDPOINT_KEY"]
+        api_key = "ROTSNgmPMVq3DElWqpN3L1dg3r3J0ab6"
         if not api_key:
             raise Exception("A key should be provided to invoke the endpoint")
         
@@ -74,8 +75,8 @@ if uploaded_file is not None:
             result = result.decode('utf-8')
             result = json.loads(result)
 
-            st.header("Response from LLM")
-            st.write(result)
+            # st.header("Response from LLM")
+            # st.write(result)
 
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
@@ -122,43 +123,41 @@ if uploaded_file is not None:
         except:
             reference = "null"
         
-        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.write("Account Holder:")
+            st.write("**Account Holder:**")
             st.write(account_holder)
         
         with col2:
-            st.write("Account Type:")
+            st.write("**Account Type:**")
             st.write(account_type)
 
         with col3:
-            st.write("Bank Name:")
-            st.write("\n")
+            st.write("**Bank Name:**")
             st.write(bank_name)
 
         with col4:
-            st.write("Account Number:")
+            st.write("**Account Number:**")
             st.write(account_number)
 
+        col5, col6, col7, col8 = st.columns(4)
+
         with col5:
-            st.write("Amount Due:")
+            st.write("**Amount Due:**")
             st.write(amount_due)
 
         with col6:
-            st.write("Currency:")
-            st.write("\n")
+            st.write("**Currency:**")
             st.write(currency)
 
         with col7:
-            st.write("Reference:")
-            st.write("\n")
+            st.write("**Reference:**")
             st.write(reference)
-        
-        confirmed = st.checkbox("Confirm the payment details are correct")
 
-        if confirmed:
-            st.balloons()
+        with col8:
+            st.write("\n")
+        
 
 
 
