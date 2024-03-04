@@ -59,8 +59,7 @@ if uploaded_file is not None:
         body = str.encode(json.dumps(data))
 
         url = 'https://discobank-mistral-invoice-poc.eastus2.inference.ml.azure.com/score'
-        #api_key = st.secrets["AZURE_ENDPOINT_KEY"]
-        api_key = "ROTSNgmPMVq3DElWqpN3L1dg3r3J0ab6"
+        api_key = st.secrets["AZURE_ENDPOINT_KEY"]
         if not api_key:
             raise Exception("A key should be provided to invoke the endpoint")
         
