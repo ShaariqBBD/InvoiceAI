@@ -49,41 +49,7 @@ if uploaded_file is not None:
             response = requests.post(url, files=files)
 
         response_data = json.loads(response.text)
-        extracted_text = response_data.get('extracted_text', '')
-
-        # st.header("Response from OCR")
-        # st.write(extracted_text)
-
-        data = extracted_text
-
-        body = str.encode(json.dumps(data))
-
-        url = 'https://discobank-mistral-invoice-poc.eastus2.inference.ml.azure.com/score'
-        api_key = st.secrets["AZURE_ENDPOINT_KEY"]
-        if not api_key:
-            raise Exception("A key should be provided to invoke the endpoint")
-        
-        headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ api_key), 'azureml-model-deployment': 'mistral-7b-invoice-test' }
-
-        req = urllib.request.Request(url, body, headers)
-
-        try:
-            response = urllib.request.urlopen(req)
-
-            result = response.read()
-            result = result.decode('utf-8')
-            result = json.loads(result)
-
-            # st.header("Response from LLM")
-            # st.write(result)
-
-        except urllib.error.HTTPError as error:
-            print("The request failed with status code: " + str(error.code))
-
-            print(error.info())
-            print(error.read().decode("utf8", 'ignore'))
-
-        st.header("Payment Details")
+        result = response_data.get('extracted_entities', '')
 
         account_holder = ""
         bank_name = ""
